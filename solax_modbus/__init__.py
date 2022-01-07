@@ -761,7 +761,7 @@ class SolaXModbusHub:
         grid_current_r = decoder.decode_16bit_int()
         self.data["grid_current_r"] = round(grid_current_r * 0.1, 1)
         
-        # @todo Rename variable as it this is the invertor power on phase R, not the grid power.
+        # @todo Consider renaming variable as it this is the invertor power on phase R, not the grid power.
         #   The grid power is currently named as feedin_power_(rst)
         #   (Measured Power), this quantity means what is Solax measuring via smart meter.
         grid_power_r = decoder.decode_16bit_int()
