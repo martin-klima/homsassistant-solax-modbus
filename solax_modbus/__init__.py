@@ -684,9 +684,20 @@ class SolaXModbusHub:
           
         if inverter_load > 0:
           self.data["house_load"] = inverter_load - feedin_power
+          self.data["house_load_r"] = grid_power_r - feedin_power_r
+          self.data["house_load_s"] = grid_power_s - feedin_power_s
+          self.data["house_load_t"] = grid_power_t - feedin_power_t
         else:
-          self.data["house_load"] = 0
-                         
+#         Experiment: Try to add inverter consumption.
+#           self.data["house_load"] = 0
+#           self.data["house_load_r"] = 0
+#           self.data["house_load_s"] = 0
+#           self.data["house_load_t"] = 0
+          self.data["house_load"] = inverter_load - feedin_power
+          self.data["house_load_r"] = grid_power_r - feedin_power_r
+          self.data["house_load_s"] = grid_power_s - feedin_power_s
+          self.data["house_load_t"] = grid_power_t - feedin_power_t
+
         feedin_energy_total = decoder.decode_16bit_uint()
         self.data["feedin_energy_total"] = round(feedin_energy_total * 0.01, 1)
         

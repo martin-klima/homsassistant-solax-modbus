@@ -366,6 +366,27 @@ SENSOR_TYPES: dict[str, list[SolaXModbusSensorEntityDescription]] = {
         device_class=DEVICE_CLASS_POWER,
         state_class=STATE_CLASS_MEASUREMENT,
     ),    
+    "house_load_r": SolaXModbusSensorEntityDescription(
+    	name="House Load R",
+    	key="house_load_r",
+    	native_unit_of_measurement=POWER_WATT,
+        device_class=DEVICE_CLASS_POWER,
+        state_class=STATE_CLASS_MEASUREMENT,
+    ),
+    "house_load_s": SolaXModbusSensorEntityDescription(
+    	name="House Load S",
+    	key="house_load_s",
+    	native_unit_of_measurement=POWER_WATT,
+        device_class=DEVICE_CLASS_POWER,
+        state_class=STATE_CLASS_MEASUREMENT,
+    ),
+    "house_load_t": SolaXModbusSensorEntityDescription(
+    	name="House Load T",
+    	key="house_load_t",
+    	native_unit_of_measurement=POWER_WATT,
+        device_class=DEVICE_CLASS_POWER,
+        state_class=STATE_CLASS_MEASUREMENT,
+    ),
     "inverter_voltage": SolaXModbusSensorEntityDescription(
     	name="Inverter Voltage",
     	key="inverter_voltage",
