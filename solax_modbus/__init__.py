@@ -205,7 +205,7 @@ class SolaXModbusHub:
     def read_modbus_data(self):
  	
         try:
-            return self.read_modbus_holding_registers_0() and self.read_modbus_holding_registers_1() and self.read_modbus_holding_registers_2() and self.read_modbus_input_registers_0() and self.read_modbus_input_registers_1()
+            return self.read_modbus_holding_registers_0() and self.read_modbus_holding_registers_1() and self.read_modbus_holding_registers_2() and self.read_modbus_input_registers_0() and self.read_modbus_input_registers_1() and self.compute_extra_sensors()
         except ConnectionException as ex:
             _LOGGER.error("Reading data failed! Inverter is offline.")   
 
@@ -681,22 +681,6 @@ class SolaXModbusHub:
           self.data["grid_import"] = abs(feedin_power)
         else:
           self.data["grid_import"] = 0
-          
-        if inverter_load > 0:
-          self.data["house_load"] = inverter_load - feedin_power
-          self.data["house_load_r"] = grid_power_r - feedin_power_r
-          self.data["house_load_s"] = grid_power_s - feedin_power_s
-          self.data["house_load_t"] = grid_power_t - feedin_power_t
-        else:
-#         Experiment: Try to add inverter consumption.
-#           self.data["house_load"] = 0
-#           self.data["house_load_r"] = 0
-#           self.data["house_load_s"] = 0
-#           self.data["house_load_t"] = 0
-          self.data["house_load"] = inverter_load - feedin_power
-          self.data["house_load_r"] = grid_power_r - feedin_power_r
-          self.data["house_load_s"] = grid_power_s - feedin_power_s
-          self.data["house_load_t"] = grid_power_t - feedin_power_t
 
         feedin_energy_total = decoder.decode_16bit_uint()
         self.data["feedin_energy_total"] = round(feedin_energy_total * 0.01, 1)
@@ -740,7 +724,7 @@ class SolaXModbusHub:
           self.data["lock_state"] = "Unlocked"
         else:
           self.data["lock_state"] = "Unknown"
-        
+
         return True
     
     def read_modbus_input_registers_1(self):
@@ -907,4 +891,20 @@ class SolaXModbusHub:
         import_energy_today = decoder.decode_16bit_uint()
         self.data["import_energy_today"] = round(import_energy_today * 0.01, 2)
         
+        return True
+
+    # Calculate house loads for each phase.
+    def compute_extra_sensors(self):
+
+        if self.data["inverter_load"] > 0:
+          self.data["house_load"] = self.data["inverter_load"] - self.data["feedin_power"]
+          self.data["house_load_r"] = self.data["grid_power_r"] - self.data["feedin_power_r"]
+          self.data["house_load_s"] = self.data["grid_power_s"] - self.data["feedin_power_s"]
+          self.data["house_load_t"] = self.data["grid_power_t"] - self.data["feedin_power_t"]
+        else:
+          self.data["house_load"] = self.data["inverter_load"] + self.data["feedin_power"]
+          self.data["house_load_r"] = self.data["grid_power_r"] + self.data["feedin_power_r"]
+          self.data["house_load_s"] = self.data["grid_power_s"] + self.data["feedin_power_s"]
+          self.data["house_load_t"] = self.data["grid_power_t"] + self.data["feedin_power_t"]
+
         return True
