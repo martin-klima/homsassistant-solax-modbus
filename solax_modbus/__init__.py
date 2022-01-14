@@ -205,7 +205,7 @@ class SolaXModbusHub:
     def read_modbus_data(self):
  	
         try:
-            return self.read_modbus_holding_registers_0() and self.read_modbus_holding_registers_1() and self.read_modbus_holding_registers_2() and self.read_modbus_input_registers_0() and self.read_modbus_input_registers_1()
+            return self.read_modbus_holding_registers_0() and self.read_modbus_holding_registers_1() and self.read_modbus_holding_registers_2() and self.read_modbus_input_registers_0() and self.read_modbus_input_registers_1() and self.compute_extra_sensors()
         except ConnectionException as ex:
             _LOGGER.error("Reading data failed! Inverter is offline.")   
 
@@ -583,9 +583,9 @@ class SolaXModbusHub:
         elif run_modes == 2:
           self.data["run_mode"] = "Normal Mode"
         elif run_modes == 3:
-          self.data["run_mode"] = "Feedin Priority"
+          self.data["run_mode"] = "Off Mode"
         elif run_modes == 4:
-          self.data["run_mode"] = "Pemanent Fault Mode"
+          self.data["run_mode"] = "Permanent Fault Mode"
         elif run_modes == 5:
           self.data["run_mode"] = "Update Mode"
         elif run_modes == 6:
@@ -681,12 +681,7 @@ class SolaXModbusHub:
           self.data["grid_import"] = abs(feedin_power)
         else:
           self.data["grid_import"] = 0
-          
-        if inverter_load > 0:
-          self.data["house_load"] = inverter_load - feedin_power
-        else:
-          self.data["house_load"] = 0
-                         
+
         feedin_energy_total = decoder.decode_16bit_uint()
         self.data["feedin_energy_total"] = round(feedin_energy_total * 0.01, 1)
         
@@ -729,7 +724,7 @@ class SolaXModbusHub:
           self.data["lock_state"] = "Unlocked"
         else:
           self.data["lock_state"] = "Unknown"
-        
+
         return True
     
     def read_modbus_input_registers_1(self):
@@ -761,8 +756,11 @@ class SolaXModbusHub:
         grid_current_r = decoder.decode_16bit_int()
         self.data["grid_current_r"] = round(grid_current_r * 0.1, 1)
         
+        # @todo Consider renaming variable as it this is the invertor power on phase R, not the grid power.
+        #   The grid power is currently named as feedin_power_(rst)
+        #   (Measured Power), this quantity means what is Solax measuring via smart meter.
         grid_power_r = decoder.decode_16bit_int()
-        self.data["grid_power_r"] = round(grid_power_r * 0.1, 1)
+        self.data["grid_power_r"] = round(grid_power_r, 1)
         
         grid_frequency_r = decoder.decode_16bit_uint()
         self.data["grid_frequency_r"] = round(grid_frequency_r * 0.01, 1)
@@ -773,8 +771,9 @@ class SolaXModbusHub:
         grid_current_s = decoder.decode_16bit_int()
         self.data["grid_current_s"] = round(grid_current_s * 0.1, 1)
         
+        # @todo Rename variable.
         grid_power_s = decoder.decode_16bit_int()
-        self.data["grid_power_s"] = round(grid_power_s * 0.1, 1)
+        self.data["grid_power_s"] = round(grid_power_s, 1)
         
         grid_frequency_s = decoder.decode_16bit_uint()
         self.data["grid_frequency_s"] = round(grid_frequency_s * 0.01, 1)
@@ -785,8 +784,9 @@ class SolaXModbusHub:
         grid_current_t = decoder.decode_16bit_int()
         self.data["grid_current_t"] = round(grid_current_t * 0.1, 1)
         
+        # @todo Rename variable.
         grid_power_t = decoder.decode_16bit_int()
-        self.data["grid_power_t"] = round(grid_power_t * 0.1, 1)
+        self.data["grid_power_t"] = round(grid_power_t, 1)
         
         grid_frequency_t = decoder.decode_16bit_uint()
         self.data["grid_frequency_t"] = round(grid_frequency_t * 0.01, 1)
@@ -891,4 +891,20 @@ class SolaXModbusHub:
         import_energy_today = decoder.decode_16bit_uint()
         self.data["import_energy_today"] = round(import_energy_today * 0.01, 2)
         
+        return True
+
+    # Calculate house loads for each phase.
+    def compute_extra_sensors(self):
+
+        if self.data["inverter_load"] > 0:
+          self.data["house_load"] = self.data["inverter_load"] - self.data["feedin_power"]
+          self.data["house_load_r"] = self.data["grid_power_r"] - self.data["feedin_power_r"]
+          self.data["house_load_s"] = self.data["grid_power_s"] - self.data["feedin_power_s"]
+          self.data["house_load_t"] = self.data["grid_power_t"] - self.data["feedin_power_t"]
+        else:
+          self.data["house_load"] = self.data["inverter_load"] + self.data["feedin_power"]
+          self.data["house_load_r"] = self.data["grid_power_r"] + self.data["feedin_power_r"]
+          self.data["house_load_s"] = self.data["grid_power_s"] + self.data["feedin_power_s"]
+          self.data["house_load_t"] = self.data["grid_power_t"] + self.data["feedin_power_t"]
+
         return True
