@@ -548,33 +548,43 @@ class SolaXModbusHub:
             realtime_data.registers, byteorder=Endian.Big
         )
 
+        # R0
         inverter_voltage = decoder.decode_16bit_uint()
         self.data["inverter_voltage"] = round(inverter_voltage * 0.1, 1)
         
+        # R1
         inverter_current = decoder.decode_16bit_int()
         self.data["inverter_current"] = round(inverter_current * 0.1, 1)
                 
+        # R2
         inverter_load = decoder.decode_16bit_int()
         self.data["inverter_load"] = inverter_load
         
+        # R3
         pv_voltage_1 = decoder.decode_16bit_uint()
         self.data["pv_voltage_1"] = round(pv_voltage_1 * 0.1, 1)
         
+        # R4
         pv_voltage_2 = decoder.decode_16bit_uint()
         self.data["pv_voltage_2"] = round(pv_voltage_2 * 0.1, 1)
         
+        # R5
         pv_current_1 = decoder.decode_16bit_uint()
         self.data["pv_current_1"] = round(pv_current_1 * 0.1, 1)
         
+        # R6
         pv_current_2 = decoder.decode_16bit_uint()
         self.data["pv_current_2"] = round(pv_current_2 * 0.1, 1)
         
+        # R7
         grid_frequency = decoder.decode_16bit_uint()
         self.data["grid_frequency"] = round(grid_frequency * 0.01, 2)
         
+        # R8
         inverter_temperature = decoder.decode_16bit_int()
         self.data["inverter_temperature"] = inverter_temperature
         
+        # R9
         run_modes = decoder.decode_16bit_uint()
         if run_modes == 0:
           self.data["run_mode"] = "Waiting"
@@ -599,9 +609,11 @@ class SolaXModbusHub:
         else:
           self.data["run_mode"] = "Unknown"
         
+        # R10
         pv_power_1 = decoder.decode_16bit_uint()
         self.data["pv_power_1"] = pv_power_1
         
+        # R11
         pv_power_2 = decoder.decode_16bit_uint()
         self.data["pv_power_2"] = pv_power_2
         
@@ -609,18 +621,23 @@ class SolaXModbusHub:
         
         decoder.skip_bytes(14)
         
+        # R19
         time_count_down = decoder.decode_16bit_uint()
         self.data["time_count_down"] = round(time_count_down * 0.001, 0)
         
+        # R20
         battery_voltage_charge = decoder.decode_16bit_int()
         self.data["battery_voltage_charge"] = round(battery_voltage_charge * mult, 1)
         
+        # R21
         battery_current_charge = decoder.decode_16bit_int()
         self.data["battery_current_charge"] = round(battery_current_charge * mult, 1)
         
+        # R22
         battery_power_charge = decoder.decode_16bit_int()
         self.data["battery_power_charge"] = battery_power_charge
         
+        # R23
         bms_connect_states = decoder.decode_16bit_uint()
         if bms_connect_states == 0:
           self.data["bms_connect_state"] = "Disconnected"
@@ -629,46 +646,59 @@ class SolaXModbusHub:
         else:
           self.data["bms_connect_state"] = "Unknown"
         
+        # R24
         battery_temperature = decoder.decode_16bit_int()
         self.data["battery_temperature"] = battery_temperature
         
         decoder.skip_bytes(6)
         
+        # R28.
         battery_capacity_charge = decoder.decode_16bit_uint()
         self.data["battery_capacity_charge"] = battery_capacity_charge
         
+        # R29
         output_energy_charge_lsb = decoder.decode_16bit_uint()
         self.data["output_energy_charge_lsb"] = round(output_energy_charge_lsb * 0.1, 1)
         
+        # R30
         output_energy_charge_msb = decoder.decode_16bit_uint()
         self.data["output_energy_charge_msb"] = round(output_energy_charge_msb * 0.1, 1)
         
+        # R31
         bms_warning_lsb = decoder.decode_16bit_uint()
         self.data["bms_warning_lsb"] = bms_warning_lsb
         
+        # R32.
         output_energy_charge_today = decoder.decode_16bit_uint()
         self.data["output_energy_charge_today"] = round(output_energy_charge_today * 0.1, 1)
         
+        # R33
         input_energy_charge_lsb = decoder.decode_16bit_uint()
         self.data["input_energy_charge_lsb"] = round(input_energy_charge_lsb * 0.1, 1)
         
+        # R34
         input_energy_charge_msb = decoder.decode_16bit_uint()
         self.data["input_energy_charge_msb"] = round(input_energy_charge_msb * 0.1, 1)
         
+        # R35
         input_energy_charge_today = decoder.decode_16bit_uint()
         self.data["input_energy_charge_today"] = round(input_energy_charge_today * 0.1, 1)
         
+        # R36?
         bms_charge_max_current = decoder.decode_16bit_uint()
         self.data["BMS Charge Max Current"] = round(bms_charge_max_current * 0.1, 1)
         
+        # R37?
         bms_discharge_max_current = decoder.decode_16bit_uint()
         self.data["BMS Discharge Max Current"] = round(bms_discharge_max_current * 0.1, 1)
         
+        # R38
         bms_warning_msb = decoder.decode_16bit_uint()
         self.data["bms_warning_msb"] = bms_warning_msb
         
         decoder.skip_bytes(62)
         
+        # R71?
         feedin_power = decoder.decode_16bit_int()
         self.data["feedin_power"] = feedin_power
                 
@@ -682,41 +712,51 @@ class SolaXModbusHub:
         else:
           self.data["grid_import"] = 0
 
+        # R72?
         feedin_energy_total = decoder.decode_16bit_uint()
         self.data["feedin_energy_total"] = round(feedin_energy_total * 0.01, 1)
         
         decoder.skip_bytes(2)
                 
+        # R74
         consumed_energy_total = decoder.decode_16bit_uint()
         self.data["consumed_energy_total"] = round(consumed_energy_total * 0.01, 1)
         
         decoder.skip_bytes(2)
         
-        eps_volatge = decoder.decode_16bit_uint()
-        self.data["eps_volatge"] = round(eps_volatge * 0.1, 1)
+        # R76
+        eps_voltage = decoder.decode_16bit_uint()
+        self.data["eps_voltage"] = round(eps_voltage * 0.1, 1)
         
+        # R77
         eps_current = decoder.decode_16bit_uint()
         self.data["eps_current"] = round(eps_current * 0.1, 1)
         
+        # R78
         eps_power = decoder.decode_16bit_uint()
         self.data["eps_power"] = eps_power
         
+        # R79
         eps_current = decoder.decode_16bit_uint()
         self.data["eps_current"] = round(eps_current * 0.1, 1)
         
+        # R80!
         eps_frequency = decoder.decode_16bit_uint()
         self.data["eps_frequency"] = round(eps_frequency * 0.01, 2)
                 
+        # R81!
         energy_today = decoder.decode_16bit_uint()
         self.data["energy_today"] = round(energy_today * 0.1, 1)
         
         decoder.skip_bytes(2)
         
+        # R83!
         total_energy_to_grid = decoder.decode_16bit_uint()
         self.data["total_energy_to_grid"] = round(total_energy_to_grid * 0.001, 1)
         
         decoder.skip_bytes(2)
         
+        # R85
         lock_states = decoder.decode_16bit_uint()
         if lock_states == 0:
           self.data["lock_state"] = "Locked"
@@ -737,7 +777,8 @@ class SolaXModbusHub:
         decoder = BinaryPayloadDecoder.fromRegisters(
             realtime_data.registers, byteorder=Endian.Big
         )
-        
+
+        #102
         bus_volt = decoder.decode_16bit_uint()
         self.data["bus_volt"] = round(bus_volt * 0.1, 1)
         
@@ -894,6 +935,9 @@ class SolaXModbusHub:
         return True
 
     # Calculate house loads for each phase.
+    # inverter_load = Solax production total (negative = consumption).
+    # grid_power_r = Solax production on phase R, etc...
+    # feedin_power* = grid power (negative = import).
     def compute_extra_sensors(self):
 
         if self.data["inverter_load"] > 0:
@@ -902,9 +946,9 @@ class SolaXModbusHub:
           self.data["house_load_s"] = self.data["grid_power_s"] - self.data["feedin_power_s"]
           self.data["house_load_t"] = self.data["grid_power_t"] - self.data["feedin_power_t"]
         else:
-          self.data["house_load"] = self.data["inverter_load"] + self.data["feedin_power"]
-          self.data["house_load_r"] = self.data["grid_power_r"] + self.data["feedin_power_r"]
-          self.data["house_load_s"] = self.data["grid_power_s"] + self.data["feedin_power_s"]
-          self.data["house_load_t"] = self.data["grid_power_t"] + self.data["feedin_power_t"]
+          self.data["house_load"] = (-1 * self.data["feedin_power"]) + self.data["inverter_load"]
+          self.data["house_load_r"] = (-1 * self.data["feedin_power_r"]) + self.data["grid_power_r"]
+          self.data["house_load_s"] = (-1 * self.data["feedin_power_s"]) + self.data["grid_power_s"]
+          self.data["house_load_t"] = (-1 * self.data["feedin_power_t"]) + self.data["grid_power_t"]
 
         return True
